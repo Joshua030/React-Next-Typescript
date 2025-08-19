@@ -1,14 +1,34 @@
 import { Link } from "react-router-dom";
+import { ButtonTypes } from "../../types";
 
 interface ButtonProps {
   children: React.ReactNode; // Define the type of children to be React nodes
   disabled?: boolean; // Optional prop to disable the button
   to?: string; // The URL to navigate to when the button is clicked
+  type: ButtonTypes;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void; // Optional click handler
 }
 
-const Button: React.FC<ButtonProps> = ({ children, disabled, to }) => {
-  const className =
-    "inline-block rounded-full bg-yellow-400 px-4 py-3 font-semibold uppercase tracking-wide text-stone-800 transition-colors duration-300 hover:bg-yellow-300 focus:bg-yellow-300 focus:outline-none focus:ring focus:ring-yellow-300 focus:ring-offset-2 disabled:cursor-not-allowed md:px-6 md:py-4";
+const base =
+  "inline-block text-sm rounded-full bg-yellow-400 font-semibold uppercase tracking-wide text-stone-800 transition-colors duration-300 hover:bg-yellow-300 focus:bg-yellow-300 focus:outline-none focus:ring focus:ring-yellow-300 focus:ring-offset-2 disabled:cursor-not-allowed";
+
+// Make styles' keys be the enum itself
+const styles: Record<ButtonTypes, string> = {
+  [ButtonTypes.primary]: base + " px-4 py-3 md:px-6 md:py-4",
+  [ButtonTypes.small]: base + " px-4 py-2 md:px-5 md:py-2.5 text-xs",
+  [ButtonTypes.round]: base + " px-2.5 py-1 md:px-3.5 md:py-2 text-sm",
+  [ButtonTypes.secondary]:
+    "inline-block text-sm rounded-full border-2 border-stone-300 font-semibold uppercase tracking-wide text-stone-400 transition-colors duration-300 hover:bg-stone-300 hover:text-stone-800 focus:bg-stone-300 focus:text-stone-800 focus:outline-none focus:ring focus:ring-stone-200 focus:ring-offset-2 disabled:cursor-not-allowed px-4 py-2.5 md:px-6 md:py-3.5",
+};
+
+const Button: React.FC<ButtonProps> = ({
+  children,
+  disabled,
+  to,
+  type,
+  onClick,
+}) => {
+  const className = styles[type];
 
   if (to) {
     return (
@@ -17,6 +37,15 @@ const Button: React.FC<ButtonProps> = ({ children, disabled, to }) => {
       </Link>
     );
   }
+
+  if (onClick) {
+    return (
+      <button className={className} disabled={disabled} onClick={onClick}>
+        {children}
+      </button>
+    );
+  }
+
   return (
     <button className={className} disabled={disabled}>
       {children}

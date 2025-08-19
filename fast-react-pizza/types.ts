@@ -10,7 +10,7 @@ export interface PizzaItem {
 /**
  * A reusable interface for the core details of a pizza item.
  */
-interface PizzaDetails {
+export interface PizzaDetails {
   pizzaId: number;
   name: string;
   quantity: number;
@@ -30,7 +30,7 @@ export interface CartItem extends PizzaDetails {
 /**
  * Represents the main data object for a single order.
  */
-interface OrderData {
+export interface OrderData {
   customer: string;
   status: string; // Consider making this a union type like "pending" | "delivered" if possible
   priority: boolean;
@@ -58,4 +58,12 @@ export interface Order {
   address: string;
   cart: PizzaDetails[];
   priority: boolean;
+}
+
+// Main types for the button types
+export enum ButtonTypes {
+  "primary",
+  "small",
+  "secondary",
+  "round",
 }

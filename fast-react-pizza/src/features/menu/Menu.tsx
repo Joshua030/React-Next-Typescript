@@ -16,7 +16,7 @@ function Menu() {
   const menu = useLoaderData() as Awaited<ReturnType<typeof loader>>; // ✅ cast to the loader's return type
 
   return (
-    <ul>
+    <ul className="divide-y divide-stone-200 px-2">
       {menu.map((pizza) => (
         <MenuItem pizza={pizza} key={pizza.id} />
       ))}
