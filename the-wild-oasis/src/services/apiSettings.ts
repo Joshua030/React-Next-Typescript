@@ -1,4 +1,8 @@
+import { Tables } from "../types/supabase";
 import supabase from "./supabase";
+
+type Settings = Tables<"settings">;
+type NewSettingsPayload = Omit<Settings, "id" | "created_at">;
 
 export async function getSettings() {
   const { data, error } = await supabase.from("settings").select("*").single();
@@ -11,7 +15,7 @@ export async function getSettings() {
 }
 
 // We expect a newSetting object that looks like {setting: newValue}
-export async function updateSetting(newSetting) {
+export async function updateSetting(newSetting: NewSettingsPayload) {
   const { data, error } = await supabase
     .from("settings")
     .update(newSetting)

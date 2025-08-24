@@ -4,8 +4,9 @@ import { format, isToday } from "date-fns";
 import Tag from "../../ui/Tag";
 import Table from "../../ui/Table";
 
-import { formatCurrency } from "../../utils/helpers";
-import { formatDistanceFromNow } from "../../utils/helpers";
+import { formatCurrency, formatDistanceFromNow } from "../../utils/helpers";
+import { BookingStatus, BookingWithRelations } from "./BookyngTypes";
+// import { formatDistanceFromNow } from "../../utils/helpers";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -34,25 +35,25 @@ const Amount = styled.div`
   font-weight: 500;
 `;
 
+interface BookingRowProps {
+  booking: BookingWithRelations;
+}
+
+type TagType = "blue" | "green" | "silver";
+
 function BookingRow({
-  booking: {
-    id: bookingId,
-    created_at,
-    startDate,
-    endDate,
-    numNights,
-    numGuests,
-    totalPrice,
-    status,
-    guests: { fullName: guestName, email },
-    cabins: { name: cabinName },
-  },
-}) {
+  booking: { id: bookingId, created_at, startDate, endDate, numNights, numGuests, totalPrice, status, guests, cabins },
+}: BookingRowProps) {
   const statusToTagName = {
     unconfirmed: "blue",
     "checked-in": "green",
     "checked-out": "silver",
-  };
+  } as const satisfies Record<BookingStatus, TagType>;
+
+  const { name: cabinName } = cabins ?? {};
+  const { fullName: guestName, email } = guests ?? {};
+
+  const safeStatus: BookingStatus = status && status in statusToTagName ? (status as BookingStatus) : "unconfirmed";
 
   return (
     <Table.Row>
@@ -63,22 +64,20 @@ function BookingRow({
         <span>{email}</span>
       </Stacked>
 
-      <Stacked>
-        <span>
-          {isToday(new Date(startDate))
-            ? "Today"
-            : formatDistanceFromNow(startDate)}{" "}
-          &rarr; {numNights} night stay
-        </span>
-        <span>
-          {format(new Date(startDate), "MMM dd yyyy")} &mdash;{" "}
-          {format(new Date(endDate), "MMM dd yyyy")}
-        </span>
-      </Stacked>
+      {startDate !== null && endDate !== null && (
+        <Stacked>
+          <span>
+            {isToday(new Date(startDate)) ? "Today" : formatDistanceFromNow(new Date(startDate))} &rarr; {numNights} night stay
+          </span>
+          <span>
+            {format(new Date(startDate), "MMM dd yyyy")} &mdash; {format(new Date(endDate), "MMM dd yyyy")}
+          </span>
+        </Stacked>
+      )}
 
-      <Tag type={statusToTagName[status]}>{status.replace("-", " ")}</Tag>
+      <Tag type={statusToTagName[safeStatus]}>{safeStatus.replace("-", " ")}</Tag>
 
-      <Amount>{formatCurrency(totalPrice)}</Amount>
+      <Amount>{formatCurrency(totalPrice || 0)}</Amount>
     </Table.Row>
   );
 }

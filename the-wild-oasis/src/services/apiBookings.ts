@@ -1,12 +1,58 @@
-import { getToday } from "../utils/helpers";
 import supabase from "./supabase";
 
+export interface getBookingsParams {
+  filter: { field: string; value: string; method: string } | null;
+  // sortby: string | null;
+}
+// type Operator = "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "like" | "ilike";
+
+export async function getBookings(filter: { field: string; value: string; method: string } | null) {
+  let query = supabase.from("bookings").select("*, cabins(name), guests(fullName, email)");
+
+  if (filter !== null) {
+    switch (filter.method) {
+      case "eq":
+        query = query.eq(filter.field, filter.value);
+        break;
+      case "neq":
+        query = query.neq(filter.field, filter.value);
+        break;
+      case "gt":
+        query = query.gt(filter.field, filter.value);
+        break;
+      case "gte":
+        query = query.gte(filter.field, filter.value);
+        break;
+      case "lt":
+        query = query.lt(filter.field, filter.value);
+        break;
+      case "lte":
+        query = query.lte(filter.field, filter.value);
+        break;
+      case "like":
+        query = query.like(filter.field, filter.value);
+        break;
+      case "ilike":
+        query = query.ilike(filter.field, filter.value);
+        break;
+      default:
+        // fallback to eq
+        query = query.eq(filter.field, filter.value);
+        break;
+    }
+  }
+
+  const { data, error } = await query;
+  if (error) {
+    console.error(error);
+    throw new Error("Bookings could not get loaded");
+  }
+
+  return data;
+}
+
 export async function getBooking(id) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select("*, cabins(*), guests(*)")
-    .eq("id", id)
-    .single();
+  const { data, error } = await supabase.from("bookings").select("*, cabins(*), guests(*)").eq("id", id).single();
 
   if (error) {
     console.error(error);
@@ -18,18 +64,16 @@ export async function getBooking(id) {
 
 // Returns all BOOKINGS that are were created after the given date. Useful to get bookings created in the last 30 days, for example.
 export async function getBookingsAfterDate(date) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select("created_at, totalPrice, extrasPrice")
-    .gte("created_at", date)
-    .lte("created_at", getToday({ end: true }));
-
-  if (error) {
-    console.error(error);
-    throw new Error("Bookings could not get loaded");
-  }
-
-  return data;
+  // const { data, error } = await supabase
+  //   .from("bookings")
+  //   .select("created_at, totalPrice, extrasPrice")
+  //   .gte("created_at", date)
+  //   .lte("created_at", getToday({ end: true }));
+  // if (error) {
+  //   console.error(error);
+  //   throw new Error("Bookings could not get loaded");
+  // }
+  // return data;
 }
 
 // Returns all STAYS that are were created after the given date
@@ -54,9 +98,7 @@ export async function getStaysTodayActivity() {
   const { data, error } = await supabase
     .from("bookings")
     .select("*, guests(fullName, nationality, countryFlag)")
-    .or(
-      `and(status.eq.unconfirmed,startDate.eq.${getToday()}),and(status.eq.checked-in,endDate.eq.${getToday()})`
-    )
+    .or(`and(status.eq.unconfirmed,startDate.eq.${getToday()}),and(status.eq.checked-in,endDate.eq.${getToday()})`)
     .order("created_at");
 
   // Equivalent to this. But by querying this, we only download the data we actually need, otherwise we would need ALL bookings ever created
@@ -71,12 +113,7 @@ export async function getStaysTodayActivity() {
 }
 
 export async function updateBooking(id, obj) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .update(obj)
-    .eq("id", id)
-    .select()
-    .single();
+  const { data, error } = await supabase.from("bookings").update(obj).eq("id", id).select().single();
 
   if (error) {
     console.error(error);

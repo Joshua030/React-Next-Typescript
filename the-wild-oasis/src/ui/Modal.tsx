@@ -1,3 +1,12 @@
+import {
+  cloneElement,
+  createContext,
+  MouseEvent,
+  useContext,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
+import { HiXMark } from "react-icons/hi2";
 import styled from "styled-components";
 
 const StyledModal = styled.div`
@@ -48,3 +57,71 @@ const Button = styled.button`
     color: var(--color-grey-500);
   }
 `;
+
+interface ModalProps {
+  children: React.ReactNode;
+}
+
+interface ModalContextType {
+  open: (name: string) => void;
+  close: () => void;
+  openName: string;
+}
+
+interface WindowProps {
+  name: string;
+  children: React.ReactElement;
+}
+
+interface OpenProps {
+  opens: string;
+  children: React.ReactElement;
+}
+
+const ModalContext = createContext<ModalContextType | undefined>(undefined);
+
+const Modal = ({ children }: ModalProps) => {
+  const [openName, setOpenName] = useState<string>("");
+  const close = () => setOpenName("");
+  const open = setOpenName;
+
+  return (
+    <ModalContext.Provider value={{ open, close, openName }}>
+      {children}
+    </ModalContext.Provider>
+  );
+};
+
+const Open = ({ opens: opensWindowsName, children }: OpenProps) => {
+  const contextData = useContext(ModalContext);
+  return cloneElement(children, {
+    onClick: () => contextData?.open(opensWindowsName),
+  });
+};
+
+const Window = ({ children, name }: WindowProps) => {
+  const contextData = useContext(ModalContext);
+
+  const closeIfSelf = (e: MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) contextData?.close();
+  };
+
+  if (name !== contextData?.openName) return null;
+
+  return createPortal(
+    <Overlay onMouseDown={closeIfSelf}>
+      <StyledModal>
+        <Button onClick={contextData?.close}>
+          <HiXMark />
+        </Button>
+        <div>{cloneElement(children, { onClose: contextData?.close })}</div>
+      </StyledModal>
+    </Overlay>,
+    document.body
+  );
+};
+
+Modal.Open = Open;
+Modal.Window = Window;
+
+export default Modal;

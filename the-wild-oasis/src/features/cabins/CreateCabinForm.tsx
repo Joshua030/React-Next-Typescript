@@ -6,11 +6,10 @@ import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import Input from "../../ui/Input";
 import { SubmitErrorHandler, SubmitHandler, useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createCabin } from "../../services/apiCabins";
-import toast from "react-hot-toast";
 import { Tables } from "../../types/supabase";
 import FormRow from "../../ui/FormRow";
+import { useCreateCabin } from "./useCreateCabin";
+import { useEditCabin } from "./useEditCabin";
 
 const FormRowDefault = styled.div`
   display: grid;
@@ -42,33 +41,55 @@ const FormRowDefault = styled.div`
 type Cabin = Tables<"cabins">;
 type NewCabinPayload = Omit<Cabin, "image"> & { image: FileList };
 
-function CreateCabinForm() {
-  const queryClient = useQueryClient();
+interface CreateCabinFormProps {
+  cabinToEdit?: Cabin;
+  onClose?: () => void;
+}
+
+function CreateCabinForm({ cabinToEdit, onClose }: CreateCabinFormProps) {
+  const { id: editId, ...editValues } = cabinToEdit || {};
+  const isEditing = Boolean(editId);
   const {
     register,
     handleSubmit,
     reset,
     getValues,
     formState: { errors },
-  } = useForm<NewCabinPayload>();
-  const { mutate: createCabinMutation, isLoading: isCreating } = useMutation({
-    mutationFn: createCabin,
-    onSuccess: () => {
-      toast.success("Cabin created successfully!");
-      queryClient.invalidateQueries({ queryKey: ["cabins"] });
-      reset();
-    },
-    onError: (err: Error | null) => {
-      toast.error(err && err?.message);
-    },
+  } = useForm<NewCabinPayload>({
+    defaultValues: isEditing ? editValues : {},
   });
 
-  console.log("errors", errors);
+  const { createCabinMutation, isCreating } = useCreateCabin(reset);
+
+  const { editCabinMutation, inEditing } = useEditCabin(reset);
+
+  const isWorking = isCreating || inEditing;
+
   const onSubmit: SubmitHandler<NewCabinPayload> = (data) => {
     // const file = data.image?.[0].toString(); // File | undefined
     // if (!file) return;
+    console.log("isEditing", isEditing);
+    console.log("editId", editId);
 
-    createCabinMutation(data);
+    if (isEditing && editId) {
+      editCabinMutation(
+        { cabinToEdit: data, editId },
+        {
+          onSuccess: (data) => {
+            // Handle success
+            onClose?.();
+            console.log("Cabin edited successfully:", data);
+          },
+        }
+      );
+    } else {
+      createCabinMutation(data, {
+        onSuccess: () => {
+          // Handle success
+          onClose?.();
+        },
+      });
+    }
   };
 
   const onError: SubmitErrorHandler<NewCabinPayload> = (errors) => {
@@ -76,12 +97,15 @@ function CreateCabinForm() {
   };
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit, onError)}>
+    <Form
+      onSubmit={handleSubmit(onSubmit, onError)}
+      type={onClose ? "modal" : "regular"}
+    >
       <FormRow label="Cabin name" error={errors.name?.message}>
         <Input
           type="text"
           id="name"
-          disabled={isCreating}
+          disabled={isWorking}
           {...register("name", { required: "Cabin name is required" })}
         />
       </FormRow>
@@ -90,7 +114,7 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="maxCapacity"
-          disabled={isCreating}
+          disabled={isWorking}
           {...register("maxCapacity", {
             required: "Maximum capacity is required",
             min: {
@@ -105,7 +129,7 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="regularPrice"
-          disabled={isCreating}
+          disabled={isWorking}
           {...register("regularPrice", {
             required: "Regular price is required",
           })}
@@ -116,7 +140,7 @@ function CreateCabinForm() {
         <Input
           type="number"
           id="discount"
-          disabled={isCreating}
+          disabled={isWorking}
           defaultValue={0}
           {...register("discount", {
             valueAsNumber: true,
@@ -143,7 +167,7 @@ function CreateCabinForm() {
       >
         <Textarea
           id="description"
-          disabled={isCreating}
+          disabled={isWorking}
           defaultValue=""
           {...register("description", { required: "Description is required" })}
         />
@@ -153,19 +177,26 @@ function CreateCabinForm() {
         <FileInput
           id="image"
           type="file"
-          disabled={isCreating}
+          disabled={isWorking}
           accept="image/*"
-          {...register("image", { required: "Cabin photo is required" })}
+          {...register("image", {
+            required: !isEditing ? "Cabin photo is required" : false,
+          })}
         />
       </FormRow>
 
       <FormRowDefault>
         {/* type is an HTML attribute! */}
-        <Button variation="secondary" type="reset" disabled={isCreating}>
+        <Button
+          variation="secondary"
+          type="reset"
+          disabled={isWorking}
+          onClick={onClose}
+        >
           Cancel
         </Button>
-        <Button type="submit" disabled={isCreating}>
-          Edit cabin
+        <Button type="submit" disabled={isWorking}>
+          {isEditing ? "Save changes" : "Create cabin"}
         </Button>
       </FormRowDefault>
     </Form>

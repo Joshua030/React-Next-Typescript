@@ -2,11 +2,12 @@ import { useState } from "react";
 import { isFuture, isPast, isToday } from "date-fns";
 import supabase from "../services/supabase";
 import Button from "../ui/Button";
-import { subtractDates } from "../utils/helpers";
 
-import { bookings } from "./data-bookings";
-import { cabins } from "./data-cabins";
+import { BookingInsert } from "../features/bookings/BookyngTypes";
 import { guests } from "./data-guests";
+import { cabins } from "./data-cabins";
+import { bookings } from "./data-bookings";
+import { subtractDates } from "../utils/helpers";
 
 // const originalSettings = {
 //   minBookingLength: 3,
@@ -42,43 +43,36 @@ async function createCabins() {
 
 async function createBookings() {
   // Bookings need a guestId and a cabinId. We can't tell Supabase IDs for each object, it will calculate them on its own. So it might be different for different people, especially after multiple uploads. Therefore, we need to first get all guestIds and cabinIds, and then replace the original IDs in the booking data with the actual ones from the DB
-  const { data: guestsIds } = await supabase
-    .from("guests")
-    .select("id")
-    .order("id");
-  const allGuestIds = guestsIds.map((cabin) => cabin.id);
-  const { data: cabinsIds } = await supabase
-    .from("cabins")
-    .select("id")
-    .order("id");
-  const allCabinIds = cabinsIds.map((cabin) => cabin.id);
+  const { data: guestsIds } = await supabase.from("guests").select("id").order("id");
+  const allGuestIds = guestsIds?.map((cabin) => cabin.id);
+  const { data: cabinsIds } = await supabase.from("cabins").select("id").order("id");
+  const allCabinIds = cabinsIds?.map((cabin) => cabin.id);
 
-  const finalBookings = bookings.map((booking) => {
+  const finalBookings = bookings?.map((booking: BookingInsert) => {
+    const bookingGuestsCorrect = booking.numGuests ?? 1;
+    const bookingEndDate = booking.endDate ?? "";
+    const bookingstartDate = booking.startDate ?? "";
+    const bookingCabinId = booking.cabinId ?? 1;
+    const bookingGuestId = booking.guestId ?? 1;
     // Here relying on the order of cabins, as they don't have and ID yet
-    const cabin = cabins.at(booking.cabinId - 1);
-    const numNights = subtractDates(booking.endDate, booking.startDate);
-    const cabinPrice = numNights * (cabin.regularPrice - cabin.discount);
-    const extrasPrice = booking.hasBreakfast
-      ? numNights * 15 * booking.numGuests
-      : 0; // hardcoded breakfast price
+    const cabin = cabins.at(bookingCabinId - 1);
+
+    const numNights = subtractDates(bookingEndDate, bookingstartDate);
+    let cabinPrice = 0;
+    if (numNights != null && cabin?.regularPrice != null && cabin?.discount != null) {
+      cabinPrice = numNights * (cabin.regularPrice - cabin.discount);
+    }
+
+    const extrasPrice = booking.hasBreakfast ? numNights * 15 * bookingGuestsCorrect : 0; // hardcoded breakfast price
     const totalPrice = cabinPrice + extrasPrice;
 
     let status;
+    if (isPast(new Date(bookingEndDate)) && !isToday(new Date(bookingEndDate))) status = "checked-out";
+    if (isFuture(new Date(bookingstartDate)) || isToday(new Date(bookingstartDate))) status = "unconfirmed";
     if (
-      isPast(new Date(booking.endDate)) &&
-      !isToday(new Date(booking.endDate))
-    )
-      status = "checked-out";
-    if (
-      isFuture(new Date(booking.startDate)) ||
-      isToday(new Date(booking.startDate))
-    )
-      status = "unconfirmed";
-    if (
-      (isFuture(new Date(booking.endDate)) ||
-        isToday(new Date(booking.endDate))) &&
-      isPast(new Date(booking.startDate)) &&
-      !isToday(new Date(booking.startDate))
+      (isFuture(new Date(bookingEndDate)) || isToday(new Date(bookingEndDate))) &&
+      isPast(new Date(bookingstartDate)) &&
+      !isToday(new Date(bookingstartDate))
     )
       status = "checked-in";
 
@@ -88,8 +82,8 @@ async function createBookings() {
       cabinPrice,
       extrasPrice,
       totalPrice,
-      guestId: allGuestIds.at(booking.guestId - 1),
-      cabinId: allCabinIds.at(booking.cabinId - 1),
+      guestId: allGuestIds?.at(bookingGuestId - 1),
+      cabinId: allCabinIds?.at(bookingCabinId - 1),
       status,
     };
   });
