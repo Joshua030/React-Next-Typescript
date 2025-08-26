@@ -2,11 +2,12 @@ import supabase from "./supabase";
 
 export interface getBookingsParams {
   filter: { field: string; value: string; method: string } | null;
+  sortby: { field: string; direction: string };
   // sortby: string | null;
 }
 // type Operator = "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "like" | "ilike";
 
-export async function getBookings(filter: { field: string; value: string; method: string } | null) {
+export async function getBookings(filter: { field: string; value: string; method: string } | null, sortBy: { field: string; direction: string }) {
   let query = supabase.from("bookings").select("*, cabins(name), guests(fullName, email)");
 
   if (filter !== null) {
@@ -40,6 +41,12 @@ export async function getBookings(filter: { field: string; value: string; method
         query = query.eq(filter.field, filter.value);
         break;
     }
+  }
+
+  if (sortBy !== null) {
+    query = query.order(sortBy.field, {
+      ascending: sortBy.direction === "asc",
+    });
   }
 
   const { data, error } = await query;
