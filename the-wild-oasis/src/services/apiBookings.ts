@@ -1,3 +1,4 @@
+import { PAGE_SIZE } from "../utils/constants";
 import supabase from "./supabase";
 
 export interface getBookingsParams {
@@ -7,8 +8,12 @@ export interface getBookingsParams {
 }
 // type Operator = "eq" | "neq" | "gt" | "gte" | "lt" | "lte" | "like" | "ilike";
 
-export async function getBookings(filter: { field: string; value: string; method: string } | null, sortBy: { field: string; direction: string }) {
-  let query = supabase.from("bookings").select("*, cabins(name), guests(fullName, email)");
+export async function getBookings(
+  filter: { field: string; value: string; method: string } | null,
+  sortBy: { field: string; direction: string },
+  page?: number
+) {
+  let query = supabase.from("bookings").select("*, cabins(name), guests(fullName, email)", { count: "exact" });
 
   if (filter !== null) {
     switch (filter.method) {
@@ -49,17 +54,26 @@ export async function getBookings(filter: { field: string; value: string; method
     });
   }
 
-  const { data, error } = await query;
+  if (page) {
+    const parserPage = Number(page);
+    const from = (parserPage - 1) * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    query = query.range(from, to);
+  }
+
+  const { data, error, count } = await query;
   if (error) {
     console.error(error);
     throw new Error("Bookings could not get loaded");
   }
 
-  return data;
+  return { data, count };
 }
 
-export async function getBooking(id) {
-  const { data, error } = await supabase.from("bookings").select("*, cabins(*), guests(*)").eq("id", id).single();
+export async function getBooking(id?: string) {
+  const bookingId = Number(id);
+
+  const { data, error } = await supabase.from("bookings").select("*, cabins(*), guests(*)").eq("id", bookingId).single();
 
   if (error) {
     console.error(error);

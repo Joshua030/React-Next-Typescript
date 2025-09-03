@@ -11,3 +11,8 @@ export type BookingWithRelations = BookingRow & {
   cabins: CabinMini | null;
   guests: GuestMini | null;
 };
+
+export type BookingComplete = BookingRow & {
+  cabins: CabinMini | null;
+  guests: Tables<"guests">;
+};

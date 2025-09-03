@@ -1,5 +1,5 @@
 import styled from "styled-components";
-type TagType = "blue" | "green" | "silver";
+export type TagType = "blue" | "green" | "silver";
 interface TagProps {
   type: TagType;
 }
