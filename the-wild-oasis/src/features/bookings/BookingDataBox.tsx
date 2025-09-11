@@ -6,7 +6,7 @@ import DataItem from "../../ui/DataItem";
 import { Flag } from "../../ui/Flag";
 
 import { formatDistanceFromNow, formatCurrency } from "../../utils/helpers";
-import { BookingComplete, BookingWithRelations } from "./BookyngTypes";
+import { BookingComplete } from "./BookyngTypes";
 
 const StyledBookingDataBox = styled.section`
   /* Box */
@@ -135,8 +135,8 @@ function BookingDataBox({ booking }: BookingDataBoxProps) {
         </div>
 
         <p>
-          {format(new Date(startDate), "EEE, MMM dd yyyy")} ({isToday(new Date(startDate)) ? "Today" : formatDistanceFromNow(startDate)}) &mdash;{" "}
-          {format(new Date(endDate), "EEE, MMM dd yyyy")}
+          {format(new Date(startDate ?? ""), "EEE, MMM dd yyyy")} ({isToday(new Date(startDate ?? "")) ? "Today" : formatDistanceFromNow(startDate)})
+          &mdash; {format(new Date(endDate ?? ""), "EEE, MMM dd yyyy")}
         </p>
       </Header>
 
@@ -144,7 +144,7 @@ function BookingDataBox({ booking }: BookingDataBoxProps) {
         <Guest>
           {countryFlag && <Flag src={countryFlag} alt={`Flag`} />}
           <p>
-            {guestName} {numGuests > 1 ? `+ ${numGuests - 1} guests` : ""}
+            {guestName} {numGuests && numGuests > 1 ? `+ ${numGuests - 1} guests` : ""}
           </p>
           <span>&bull;</span>
           <p>{email}</p>
