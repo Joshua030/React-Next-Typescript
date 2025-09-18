@@ -50,10 +50,12 @@ function UpdateUserDataForm() {
         <FileInput id="avatar" accept="image/*" onChange={(e) => setAvatar(e.target.files?.[0] ?? null)} disabled={isUpdating} />
       </FormRow>
       <FormRow>
-        <Button type="reset" variation="secondary" disabled={isUpdating} onClick={handleCancel}>
-          Cancel
-        </Button>
-        <Button disabled={isUpdating}>Update account</Button>
+        <>
+          <Button type="reset" variation="secondary" disabled={isUpdating} onClick={handleCancel}>
+            Cancel
+          </Button>
+          <Button disabled={isUpdating}>Update account</Button>
+        </>
       </FormRow>
     </Form>
   );

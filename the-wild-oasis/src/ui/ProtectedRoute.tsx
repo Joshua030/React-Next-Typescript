@@ -18,7 +18,7 @@ const FullPage = styled.div`
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // 1. Load the authenticated user
-  const { user, isLoading, isAuthenticated } = useUser();
+  const { isLoading, isAuthenticated } = useUser();
 
   // 2. While loading, show a spinner
 

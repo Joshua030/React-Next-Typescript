@@ -48,9 +48,7 @@ interface BookingRowProps {
 
 type TagType = "blue" | "green" | "silver";
 
-function BookingRow({
-  booking: { id: bookingId, created_at, startDate, endDate, numNights, numGuests, totalPrice, status, guests, cabins },
-}: BookingRowProps) {
+function BookingRow({ booking: { id: bookingId, startDate, endDate, numNights, totalPrice, status, guests, cabins } }: BookingRowProps) {
   const statusToTagName = {
     unconfirmed: "blue",
     "checked-in": "green",

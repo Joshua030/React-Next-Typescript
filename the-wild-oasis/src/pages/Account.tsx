@@ -8,14 +8,18 @@ function Account() {
     <>
       <Heading as="h1">Update your account</Heading>
 
-      <Row>
-        <Heading as="h3">Update user data</Heading>
-        <UpdateUserDataForm />
+      <Row type="vertical">
+        <>
+          <Heading as="h3">Update user data</Heading>
+          <UpdateUserDataForm />
+        </>
       </Row>
 
-      <Row>
-        <Heading as="h3">Update password</Heading>
-        <UpdatePasswordForm />
+      <Row type="vertical">
+        <>
+          <Heading as="h3">Update password</Heading>
+          <UpdatePasswordForm />
+        </>
       </Row>
     </>
   );

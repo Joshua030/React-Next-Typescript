@@ -1,0 +1,76 @@
+import { getCabin } from "@/app/_lib/data-service";
+import { EyeSlashIcon, MapPinIcon, UsersIcon } from "@heroicons/react/24/solid";
+import Image from "next/image";
+
+// 1) Define your params once
+type Params = { cabinId: string };
+
+// 2) A tiny helper for “has params”
+interface SingleCabinParams {
+  params: Params;
+}
+
+// 3) Extend it for the full props you might pass around
+// interface SingleCabinProps extends SingleCabinParams{
+// }
+
+export async function generateMetadata({ params }: SingleCabinParams) {
+  const { name = "" } = (await getCabin(params.cabinId)) ?? {};
+  return { title: `Cabin ${name}` };
+}
+export default async function Page({ params }: SingleCabinParams) {
+  const cabin = await getCabin(params?.cabinId);
+  const { name, maxCapacity, image, description } = cabin ?? {};
+
+  return (
+    <div className="mx-auto mt-8 max-w-6xl">
+      <div className="mb-24 grid grid-cols-[3fr_4fr] gap-20 border border-primary-800 px-10 py-3">
+        <div className="relative -translate-x-3 scale-[1.15]">
+          <Image
+            src={image ?? "/no_cabin.png"}
+            fill
+            alt={`Cabin ${name}`}
+            className="object-cover"
+          />
+        </div>
+
+        <div>
+          <h3 className="mb-5 w-[150%] translate-x-[-254px] bg-primary-950 p-6 pb-1 text-7xl font-black text-accent-100">
+            Cabin {name}
+          </h3>
+
+          <p className="mb-10 text-lg text-primary-300">{description}</p>
+
+          <ul className="mb-7 flex flex-col gap-4">
+            <li className="flex items-center gap-3">
+              <UsersIcon className="h-5 w-5 text-primary-600" />
+              <span className="text-lg">
+                For up to <span className="font-bold">{maxCapacity}</span>{" "}
+                guests
+              </span>
+            </li>
+            <li className="flex items-center gap-3">
+              <MapPinIcon className="h-5 w-5 text-primary-600" />
+              <span className="text-lg">
+                Located in the heart of the{" "}
+                <span className="font-bold">Dolomites</span> (Italy)
+              </span>
+            </li>
+            <li className="flex items-center gap-3">
+              <EyeSlashIcon className="h-5 w-5 text-primary-600" />
+              <span className="text-lg">
+                Privacy <span className="font-bold">100%</span> guaranteed
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-center text-5xl font-semibold">
+          Reserve today. Pay on arrival.
+        </h2>
+      </div>
+    </div>
+  );
+}

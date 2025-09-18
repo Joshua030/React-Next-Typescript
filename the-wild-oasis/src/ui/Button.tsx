@@ -52,6 +52,7 @@ interface ButtonProps {
   variation?: "primary" | "secondary" | "danger";
   size?: "small" | "medium" | "large";
   onClick?: () => void;
+  icon?: React.ReactNode;
 }
 
 const Button = styled.button<ButtonProps>`

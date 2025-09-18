@@ -136,7 +136,17 @@ function List({ id, children }: { id: number; children: React.ReactNode }) {
   );
 }
 
-function Button({ children, icon, onClick }: { children: React.ReactNode; icon: React.ReactNode; onClick?: () => void }) {
+function Button({
+  children,
+  icon,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode;
+  icon: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
   const { close } = useMenus();
   const handleClick = () => {
     onClick?.();
@@ -144,7 +154,7 @@ function Button({ children, icon, onClick }: { children: React.ReactNode; icon: 
   };
   return (
     <li>
-      <StyledButton onClick={handleClick}>
+      <StyledButton onClick={handleClick} disabled={disabled}>
         {icon}
         <span>{children}</span>
       </StyledButton>

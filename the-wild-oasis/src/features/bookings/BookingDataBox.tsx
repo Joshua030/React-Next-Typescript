@@ -64,7 +64,11 @@ const Guest = styled.div`
   }
 `;
 
-const Price = styled.div`
+interface PriceProps {
+  isPaid: boolean;
+}
+
+const Price = styled.div<PriceProps>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -135,8 +139,9 @@ function BookingDataBox({ booking }: BookingDataBoxProps) {
         </div>
 
         <p>
-          {format(new Date(startDate ?? ""), "EEE, MMM dd yyyy")} ({isToday(new Date(startDate ?? "")) ? "Today" : formatDistanceFromNow(startDate)})
-          &mdash; {format(new Date(endDate ?? ""), "EEE, MMM dd yyyy")}
+          {format(new Date(startDate ?? ""), "EEE, MMM dd yyyy")} (
+          {isToday(new Date(startDate ?? "")) ? "Today" : formatDistanceFromNow(new Date(startDate || 0))}) &mdash;{" "}
+          {format(new Date(endDate ?? ""), "EEE, MMM dd yyyy")}
         </p>
       </Header>
 
@@ -162,11 +167,11 @@ function BookingDataBox({ booking }: BookingDataBoxProps) {
           {hasBreakfast ? "Yes" : "No"}
         </DataItem>
 
-        <Price isPaid={isPaid}>
+        <Price isPaid={isPaid ?? false}>
           <DataItem icon={<HiOutlineCurrencyDollar />} label={`Total price`}>
-            {formatCurrency(totalPrice)}
+            {formatCurrency(totalPrice ?? 0)}
 
-            {hasBreakfast && ` (${formatCurrency(cabinPrice)} cabin + ${formatCurrency(extrasPrice)} breakfast)`}
+            {hasBreakfast && ` (${formatCurrency(cabinPrice ?? 0)} cabin + ${formatCurrency(extrasPrice ?? 0)} breakfast)`}
           </DataItem>
 
           <p>{isPaid ? "Paid" : "Will pay at property"}</p>

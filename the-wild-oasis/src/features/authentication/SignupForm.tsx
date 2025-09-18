@@ -70,12 +70,14 @@ function SignupForm() {
 
       <FormRow>
         {/* type is an HTML attribute! */}
-        <Button variation="secondary" type="reset">
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isLoading}>
-          Create new user
-        </Button>
+        <>
+          <Button variation="secondary" type="reset">
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            Create new user
+          </Button>
+        </>
       </FormRow>
     </Form>
   );

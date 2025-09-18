@@ -25,7 +25,20 @@ const Guest = styled.div`
   font-weight: 500;
 `;
 
-function TodayItem({ activity }) {
+interface TodayItemProps {
+  activity: {
+    id: string;
+    status: "unconfirmed" | "checked-in" | "checked-out";
+    guests: {
+      fullName: string;
+      country: string;
+      countryFlag: string;
+    };
+    numNights: number;
+  };
+}
+
+function TodayItem({ activity }: TodayItemProps) {
   const { id, status, guests, numNights } = activity;
 
   return (
@@ -42,7 +55,7 @@ function TodayItem({ activity }) {
           Check in
         </Button>
       )}
-      {status === "checked-in" && <CheckoutButton bookingId={id} />}
+      {status === "checked-in" && <CheckoutButton />}
     </StyledTodayItem>
   );
 }
