@@ -1,7 +1,8 @@
+"use client";
 import { useState } from "react";
 
 interface TextExpanderProps {
-  children: React.ReactNode;
+  children: string;
 }
 
 function TextExpander({ children }: TextExpanderProps) {
@@ -14,7 +15,7 @@ function TextExpander({ children }: TextExpanderProps) {
     <span>
       {displayText}{" "}
       <button
-        className="text-primary-700 border-b border-primary-700 leading-3 pb-1"
+        className="border-b border-primary-700 pb-1 leading-3 text-primary-700"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {isExpanded ? "Show less" : "Show more"}
