@@ -1,10 +1,13 @@
 "use client";
+import Image from "next/image";
 import { Cabin } from "../_types/generalTypes";
+import { User } from "next-auth";
 
 interface ReservationFormProps {
   cabin: Cabin;
+  user: User;
 }
-function ReservationForm({ cabin }: ReservationFormProps) {
+function ReservationForm({ cabin, user }: ReservationFormProps) {
   //  const { range, setRange, resetRange } = useReservation();
   // CHANGE
   const { maxCapacity } = cabin;
@@ -14,16 +17,18 @@ function ReservationForm({ cabin }: ReservationFormProps) {
       <div className="flex items-center justify-between bg-primary-800 px-16 py-2 text-primary-300">
         <p>Logged in as</p>
 
-        {/* <div className='flex gap-4 items-center'>
-          <img
+        <div className="flex items-center gap-4">
+          <Image
             // Important to display google profile images
-            referrerPolicy='no-referrer'
-            className='h-8 rounded-full'
-            src={user.image}
-            alt={user.name}
+            referrerPolicy="no-referrer"
+            className="h-8 rounded-full"
+            src={user.image || ""}
+            alt={user.name || "no profile image"}
+            width={40}
+            height={40}
           />
           <p>{user.name}</p>
-        </div> */}
+        </div>
       </div>
 
       <form className="flex flex-col gap-5 bg-primary-900 px-16 py-10 text-lg">
